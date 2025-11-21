@@ -1,5 +1,6 @@
 import React, { useState, Suspense, useEffect } from "react";
 import { m, LazyMotion, domAnimation } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react";
 import SplatterBackground from "./components/SplatterBackground";
 import Navigation from "./components/Navigation";
 import { SectionType } from "./types";
@@ -156,6 +157,7 @@ export default function App() {
         </div>
 
       </main>
+      <Analytics />
     </LazyMotion>
   );
 }
