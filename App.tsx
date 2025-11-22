@@ -14,7 +14,7 @@ const SOCIAL_LINKS = [
   },
   {
     name: "X (Twitter)",
-    href: "https://twitter.com/thezackstevens",
+    href: "https://x.com/imzackstevens",
     icon: FaXTwitter,
   },
   {
