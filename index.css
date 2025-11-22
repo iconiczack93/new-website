@@ -19,6 +19,22 @@ body {
   animation: gradient-x 10s ease infinite;
 }
 
+.gradient-text-outline {
+  display: inline-block;
+  background: linear-gradient(120deg, #7928ca, #ff0080, #0070f3, #7928ca);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  animation: gradient-x 8s ease infinite;
+  text-shadow:
+    0 0 8px rgba(121, 40, 202, 0.4),
+    0 0 12px rgba(255, 0, 128, 0.25),
+    0 0 14px rgba(0, 112, 243, 0.25);
+}
+
 @keyframes gradient-x {
   0%, 100% {
     background-position: left center;
@@ -39,6 +55,15 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 20px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 ::selection {

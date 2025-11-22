@@ -50,6 +50,8 @@ interface ProjectModalProps {
 
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, layoutId }) => {
   const [slideIndex, setSlideIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
   const images = project.images || [];
   const hasGallery = images.length > 0;
   const containsVideo = images.some(isVideo);
@@ -70,14 +72,31 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, layoutId 
     };
   }, [onClose]);
 
-  const nextSlide = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const nextSlide = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
     setSlideIndex((prev) => (prev + 1) % images.length);
   };
 
-  const prevSlide = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const prevSlide = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
     setSlideIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      nextSlide();
+    }
+    if (touchStart - touchEnd < -75) {
+      prevSlide();
+    }
   };
 
   // No delayed autoplay; rely on video asset itself
@@ -92,7 +111,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, layoutId 
     >
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-[#F6F1EA]/95 backdrop-blur-xl" 
+        className="absolute inset-0 bg-[#F6F1EA]/95 backdrop-blur-xl pointer-events-none" 
         onClick={onClose}
       />
 
@@ -103,20 +122,27 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, layoutId 
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-7xl h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row border border-white/50"
+        className="relative w-full max-w-7xl h-[85vh] md:h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row border border-white/50 touch-auto pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 z-50 p-2 bg-white/80 hover:bg-white backdrop-blur-md rounded-full transition-colors text-zinc-500 hover:text-black border border-zinc-200/50 shadow-sm"
+          onTouchEnd={(e) => { e.stopPropagation(); onClose(); }}
+          className="absolute top-4 right-4 z-[100] p-3 md:p-2 bg-white/90 hover:bg-white backdrop-blur-md rounded-full transition-colors text-zinc-700 hover:text-black border border-zinc-300 shadow-lg touch-manipulation pointer-events-auto"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
 
         {/* Gallery Section (Left Side) */}
         {hasGallery ? (
-          <div className="relative w-full lg:w-[65%] h-64 lg:h-full bg-white shrink-0 select-none group overflow-hidden" style={{ willChange: 'auto', contain: 'layout style paint' }}>
+          <div 
+            className="relative w-full lg:w-[65%] h-64 lg:h-full bg-white shrink-0 select-none group overflow-hidden touch-pan-x" 
+            style={{ willChange: 'auto', contain: 'layout style paint' }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
              <AnimatePresence initial={false} custom={slideIndex}>
                 <m.div
                   layoutId={`project-${project.title}-media`}
@@ -199,7 +225,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, layoutId 
         )}
 
         {/* Content Section (Right Side) */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-10 custom-scrollbar bg-white relative">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar bg-white relative touch-pan-y">
            <div className="flex flex-col gap-4 mb-8 mt-8 lg:mt-0">
              <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-black leading-tight">{project.title}</h2>
              <div className="flex items-center gap-4">
@@ -268,10 +294,11 @@ const ProjectItem: React.FC<{ project: Project; onClick: () => void; onPreviewCl
             onPreviewClick?.();
           }}
           layoutId={`project-preview-${project.title}`}
-          className="hidden lg:block absolute top-1/2 right-[-13rem] -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-4 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black/30"
+          className="hidden lg:block absolute top-1/2 right-[-8rem] -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-4 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black/30"
           aria-label={`Open ${project.title} project`}
         >
-          <div className="w-52 h-36 rounded-2xl overflow-hidden border border-white/60 shadow-lg shadow-black/10 bg-white/90 backdrop-blur">
+          <div className="relative w-60 h-44 rounded-2xl overflow-hidden border border-white/60 shadow-lg shadow-black/10 bg-white/95 backdrop-blur">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 to-transparent pointer-events-none"></div>
             <img
               src={previewImage}
               alt={`${project.title} preview`}
@@ -279,6 +306,18 @@ const ProjectItem: React.FC<{ project: Project; onClick: () => void; onPreviewCl
               decoding="async"
               className="w-full h-full object-cover"
             />
+            <div className="absolute left-3 bottom-3">
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white rounded-full bg-gradient-to-r from-[#7928ca] via-[#ff0080] to-[#0070f3] shadow-lg shadow-purple-500/40">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 10l4.553-4.553a.75.75 0 0 0-1.06-1.06L14 8.94" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M16 3h5v5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 14l-4.553 4.553a.75.75 0 0 0 1.06 1.06L10 15.06" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 21H3v-5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 7l10 10" strokeLinecap="round"/>
+                </svg>
+                View
+              </span>
+            </div>
           </div>
         </m.button>
       )}
@@ -287,7 +326,7 @@ const ProjectItem: React.FC<{ project: Project; onClick: () => void; onPreviewCl
           <h3 className="text-3xl font-light tracking-tight text-zinc-900 group-hover:text-[#7928ca] transition-colors duration-300">
             {project.title}
           </h3>
-          <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">
+          <span className="text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0 stripe-gradient-text">
             View Project
           </span>
         </div>
@@ -341,28 +380,40 @@ const ContentPanel: React.FC<ContentPanelProps> = ({ activeSection, onClose }) =
 
   // Smooth scrolling with Lenis
   useEffect(() => {
-    if (activeSection && scrollContainerRef.current) {
-      const lenis = new Lenis({
-        wrapper: scrollContainerRef.current,
-        content: scrollContainerRef.current.firstElementChild as HTMLElement,
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        gestureOrientation: 'vertical',
-        smoothWheel: true,
-        touchMultiplier: 2,
-      });
+    const container = scrollContainerRef.current;
+    if (typeof window === "undefined") return;
 
-      function raf(time: number) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-      requestAnimationFrame(raf);
+    if (!activeSection || !container) return;
 
-      return () => {
-        lenis.destroy();
-      };
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+
+    if (!mediaQuery.matches) {
+      container.scrollTop = 0;
+      return;
     }
+
+    const lenis = new Lenis({
+      wrapper: container,
+      content: container.firstElementChild as HTMLElement,
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      touchMultiplier: 2,
+    });
+
+    let rafId: number;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
   }, [activeSection]);
 
   const openProject = (project: Project, fromPreview = false) => {
@@ -538,8 +589,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({ activeSection, onClose }) =
       <div 
         className={`
           pointer-events-auto
-          fixed inset-0 z-50 md:z-auto
-          md:static md:inset-auto
+          ${activeSection ? 'fixed inset-0 z-50 md:z-auto md:static md:inset-auto' : 'hidden md:block md:static'}
           w-full h-full
           bg-[#F2F0EF] md:bg-transparent
           flex flex-col
@@ -554,17 +604,6 @@ const ContentPanel: React.FC<ContentPanelProps> = ({ activeSection, onClose }) =
           </button>
         </div>
 
-        {/* Reading Progress Indicator (Desktop) */}
-        <m.div 
-          className="hidden md:block fixed right-[2px] top-1/4 bottom-1/4 w-[2px] bg-zinc-200 rounded-full overflow-hidden z-50"
-          style={{ height: '50vh' }}
-        >
-          <m.div 
-            className="w-full bg-gradient-to-b from-[#7928ca] to-[#0070f3]" 
-            style={{ scaleY, transformOrigin: "top" }} 
-          />
-        </m.div>
-
         <AnimatePresence mode="wait">
           {activeSection && (
             <m.div
@@ -573,7 +612,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({ activeSection, onClose }) =
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-16 pt-4 md:pt-12 pb-24 w-full h-full"
+              className="flex-1 overflow-y-auto scrollbar-hide px-6 md:px-16 pt-4 md:pt-12 pb-24 w-full h-full"
               ref={scrollContainerRef}
             >
               {/* Section Header */}

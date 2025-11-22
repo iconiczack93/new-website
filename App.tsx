@@ -83,7 +83,7 @@ export default function App() {
         <div className="relative z-10 flex flex-col md:flex-row w-full h-full">
           
           {/* Left Column: Identity & Nav */}
-          <div className="w-full md:w-1/2 h-full flex flex-col justify-center p-8 md:p-16 pointer-events-auto shrink-0 transition-all duration-500">
+          <div className="w-full md:w-[58%] h-full flex flex-col justify-center p-8 md:p-16 md:pr-32 pointer-events-auto shrink-0 transition-all duration-500 overflow-visible">
             <m.div
               initial="idle"
               animate={activeSection ? "active" : "idle"}
@@ -91,7 +91,7 @@ export default function App() {
               transition={{ duration: 0.5 }}
             >
               {/* Headshot + Name */}
-              <div className="flex items-center gap-6 mb-4">
+              <div className="flex items-center gap-6 mb-4 overflow-visible">
                 {/* Headshot */}
                 <m.div
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -111,7 +111,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-tight"
+                  className="text-[2.4rem] md:text-[2.8rem] lg:text-[3.4rem] font-bold tracking-tight leading-snug"
                 >
                   <span className="stripe-gradient-text">Zack Stevens</span>
                 </m.h1>
@@ -146,7 +146,7 @@ export default function App() {
           </div>
 
           {/* Right Column: Content Display Area */}
-          <div className="w-full md:w-1/2 h-full relative pointer-events-none md:pointer-events-auto">
+          <div className="w-full md:w-[42%] h-full relative pointer-events-none md:pointer-events-auto">
             <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-300 animate-pulse">Loading...</div>}>
               <ContentPanel 
                 activeSection={activeSection} 
