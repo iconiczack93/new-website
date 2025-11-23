@@ -474,7 +474,8 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
 
     const analyzeWithAI = async (text: string) => {
         try {
-            const GEMINI_API_KEY = 'AIzaSyDHTrg_KfwNXTLxakUjYp3MeLiAnqZ1uU0';
+            // API key should be set as environment variable VITE_GEMINI_API_KEY
+            const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
             
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
