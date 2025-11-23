@@ -706,7 +706,8 @@ ${text}`
     };
 
     const exportAsCSV = () => {
-        const csv = `Role,Skills,Location,Boolean String\n"${role}","${skills.join('; ')}","${location}","${generated}"`;
+        const escapeCSV = (str: string) => str.replace(/"/g, '""');
+        const csv = `Role,Skills,Location,Boolean String\n"${escapeCSV(role)}","${escapeCSV(skills.join('; '))}","${escapeCSV(location)}","${escapeCSV(generated)}"`;
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1059,7 +1060,7 @@ const TiltCard: React.FC<TiltCardProps> = ({ project, className, onClick }) => {
       </div>
 
       {/* LAYER 1: Content */}
-      <div className="relative h-full p-8 md:p-10 flex flex-col justify-between pointer-events-none">
+      <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between pointer-events-none">
         
         {/* Header - Floats */}
         <div 
@@ -1086,7 +1087,7 @@ const TiltCard: React.FC<TiltCardProps> = ({ project, className, onClick }) => {
                  {project.title}
             </h3>
             
-             <p className="text-base text-zinc-500 dark:text-gray-400 font-light whitespace-nowrap overflow-hidden text-ellipsis">
+             <p className="text-base text-zinc-500 dark:text-gray-400 font-light">
                 {project.description}
             </p>
         </div>
