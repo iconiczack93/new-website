@@ -836,11 +836,11 @@ ${text}`
                                 value={generated}
                             />
                             <div className="absolute bottom-2 right-2 flex gap-1 z-10 opacity-50 group-hover/code:opacity-100 transition-opacity">
-                                <button onClick={() => runSearch('linkedin')} className="p-1.5 bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors" title="Run on LinkedIn">
-                                    <Search size={12} />
-                                </button>
                                 <button onClick={copyToClipboard} className="p-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-white transition-colors" title="Copy">
                                     {copied ? <Check size={12} /> : <Copy size={12} />}
+                                </button>
+                                <button onClick={() => setGenerated('Your Boolean search string will appear here...')} className="p-1.5 bg-red-600 hover:bg-red-500 rounded text-white transition-colors" title="Clear">
+                                    <Trash2 size={12} />
                                 </button>
                             </div>
                         </div>
