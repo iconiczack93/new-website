@@ -383,26 +383,53 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
 
     const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file || file.type !== 'application/pdf') return;
+        if (!file || file.type !== 'application/pdf') {
+            showToast('⚠️ Please select a valid PDF file');
+            return;
+        }
 
         try {
-            // For now, we'll show a message that PDF extraction is coming soon
-            // In a real implementation, you'd use a library like pdf-parse or PDF.js
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm';
-            toast.textContent = 'PDF upload coming soon! For now, please copy/paste the text.';
-            document.body.appendChild(toast);
+            showToast('📄 Processing PDF...');
             
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, 3000);
-
-            // Reset the file input
-            e.target.value = '';
+            // Read the file as text using FileReader
+            const reader = new FileReader();
+            
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target?.result as ArrayBuffer;
+                
+                // Use PDF.js from CDN to extract text
+                const loadingTask = (window as any).pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                
+                let fullText = '';
+                
+                // Extract text from all pages
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+                
+                // Set the extracted text
+                setJdText(fullText.trim());
+                showToast('✓ PDF extracted successfully!');
+                
+                // Reset the file input
+                e.target.value = '';
+            };
+            
+            reader.onerror = () => {
+                showToast('❌ Error reading PDF file');
+                e.target.value = '';
+            };
+            
+            reader.readAsArrayBuffer(file);
+            
         } catch (error) {
             console.error('PDF processing error:', error);
+            showToast('❌ Error processing PDF. Try copy/paste instead.');
+            e.target.value = '';
         }
     };
 
