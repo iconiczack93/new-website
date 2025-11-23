@@ -56,30 +56,30 @@ export const Contact: React.FC = () => {
         <div className="flex justify-between items-end pt-12 border-t border-zinc-300 dark:border-white/10">
           <div className="text-left">
              <div className="flex gap-6 mb-4">
-               <a 
-                 href="https://github.com/iconiczack93" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-               >
-                 <Github size={20} />
-               </a>
-               <a 
-                 href="https://x.com/imzackstevens" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-               >
-                 <Twitter size={20} />
-               </a>
-               <a 
-                 href="https://www.linkedin.com/in/zackstevens-/" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-               >
-                 <Linkedin size={20} />
-               </a>
+              <a 
+                href="https://www.linkedin.com/in/zackstevens-/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+              >
+                <Linkedin size={20} />
+              </a>
+              <a 
+                href="https://github.com/iconiczack93" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+              >
+                <Github size={20} />
+              </a>
+              <a 
+                href="https://x.com/imzackstevens" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+              >
+                <Twitter size={20} />
+              </a>
              </div>
              <p className="text-xs text-zinc-500 dark:text-gray-600 font-mono">
                &copy; 2025 Zack Stevens.
