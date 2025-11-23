@@ -476,8 +476,43 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
         try {
             // API key should be set as environment variable VITE_GEMINI_API_KEY
             const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+            const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
+            const GEMINI_API_VERSION = import.meta.env.VITE_GEMINI_API_VERSION || 'v1';
             
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            console.log('🔑 API Key loaded:', GEMINI_API_KEY ? `${GEMINI_API_KEY.substring(0, 10)}...` : 'MISSING');
+            
+            if (!GEMINI_API_KEY) {
+                console.error('❌ No API key found in environment variables');
+                showToast('⚠️ API key not configured. Using fallback parsing...');
+                // Fallback to regex parsing
+                const foundSkills = extractSkills(text);
+                const { role: foundRole, seniority } = extractRole(text);
+                const foundLocation = extractLocation(text);
+                
+                setSkills(foundSkills);
+                const finalRole = seniority && foundRole ? 
+                    (foundRole.includes(seniority) ? foundRole : `${seniority} ${foundRole}`) : 
+                    foundRole || '';
+                setRole(finalRole);
+                if (foundLocation) setLocation(foundLocation);
+                
+                const parts = [];
+                if (finalRole) parts.push(finalRole);
+                if (foundSkills.length > 0) parts.push(`${foundSkills.length} skills`);
+                if (foundLocation) parts.push(foundLocation);
+                
+                if (parts.length > 0) {
+                    showToast(`✓ Found: ${parts.join(', ')}`);
+                } else {
+                    showToast('⚠️ No clear matches found');
+                }
+                setMode('build');
+                return;
+            }
+            
+            console.log(`🌐 Gemini model: ${GEMINI_MODEL} via ${GEMINI_API_VERSION}`);
+            console.log('🤖 Calling Gemini API...');
+            const response = await fetch(`https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -510,13 +545,32 @@ ${text}`
                 })
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('❌ API Error:', errorData);
+                
+                if (response.status === 404) {
+                    console.error(`Model "${GEMINI_MODEL}" may not be enabled for API version "${GEMINI_API_VERSION}".`);
+                    showToast('⚠️ Selected Gemini model is unavailable. Check API access.');
+                }
+                throw new Error(`API returned ${response.status}: ${JSON.stringify(errorData)}`);
+            }
+
             const data = await response.json();
+            console.log('✓ API Response:', data);
+            
+            if (!data.candidates || !data.candidates[0]) {
+                throw new Error('No candidates in API response');
+            }
+            
             const aiResponse = data.candidates[0].content.parts[0].text;
+            console.log('✓ AI Text:', aiResponse);
             
             // Parse the JSON response
             const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const parsed = JSON.parse(jsonMatch[0]);
+                console.log('✓ Parsed:', parsed);
                 
                 // Auto-populate the form
                 if (parsed.role) setRole(parsed.role);
@@ -532,12 +586,30 @@ ${text}`
                 showToast(`✓ AI Parsed: ${parts.join(', ')}`);
                 setMode('build'); // Switch to build mode to show results
             } else {
-                throw new Error('Invalid AI response');
+                throw new Error('Invalid AI response format');
             }
             
         } catch (error) {
-            console.error('AI analysis error:', error);
+            console.error('❌ AI analysis error:', error);
             showToast('⚠️ AI parsing failed. Please review and adjust manually.');
+            // Don't leave the user hanging - at least try regex fallback
+            try {
+                const foundSkills = extractSkills(text);
+                const { role: foundRole, seniority } = extractRole(text);
+                const foundLocation = extractLocation(text);
+                
+                if (foundSkills.length > 0 || foundRole) {
+                    setSkills(foundSkills);
+                    const finalRole = seniority && foundRole ? 
+                        (foundRole.includes(seniority) ? foundRole : `${seniority} ${foundRole}`) : 
+                        foundRole || '';
+                    setRole(finalRole);
+                    if (foundLocation) setLocation(foundLocation);
+                    setMode('build');
+                }
+            } catch (fallbackError) {
+                console.error('❌ Fallback also failed:', fallbackError);
+            }
         }
     };
 
