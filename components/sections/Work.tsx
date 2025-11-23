@@ -829,10 +829,10 @@ ${text}`
                              </button>
                          )}
 
-                        <div className="flex-1 relative group/code min-h-0 bg-zinc-900 dark:bg-black rounded-lg border border-zinc-800 dark:border-white/10 overflow-hidden mt-1">
+                        <div className="flex-1 relative group/code min-h-[200px] bg-zinc-900 dark:bg-black rounded-lg border border-zinc-800 dark:border-white/10 overflow-hidden mt-1">
                             <textarea 
                                 readOnly
-                                className="w-full h-full bg-transparent text-green-400 font-mono text-[10px] p-3 rounded-lg resize-none outline-none leading-relaxed"
+                                className="w-full h-full bg-transparent text-green-400 font-mono text-sm p-4 rounded-lg resize-none outline-none leading-relaxed"
                                 value={generated}
                             />
                             <div className="absolute bottom-2 right-2 flex gap-1 z-10 opacity-50 group-hover/code:opacity-100 transition-opacity">
