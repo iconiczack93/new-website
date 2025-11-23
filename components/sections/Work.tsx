@@ -309,33 +309,52 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
     const extractRole = (text: string): { role: string; seniority: string } => {
         let bestRole = '';
         let bestSeniority = '';
-        let bestScore = 0;
-        let seniorityScore = 0;
         
-        // Find seniority level with scoring (higher score = more senior/specific)
-        const seniorityScores: Record<string, number> = {
-            'Junior': 1,
-            'Mid-level': 2,
-            'Senior': 3,
-            'Staff': 4,        // Staff > Senior
-            'Principal': 5,    // Principal > Staff
-            'Lead': 3,         // Lead ~ Senior (to not override Staff/Principal)
-            'Manager': 6,
-            'Director': 7,
-            'Executive': 8
-        };
+        // FIRST: Try to find the actual job title (usually in first 500 chars)
+        const topOfDoc = text.substring(0, 500);
+        const lines = topOfDoc.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         
-        Object.entries(SENIORITY_KEYWORDS).forEach(([level, variations]) => {
-            variations.forEach(variation => {
-                if (createSafeRegex(variation).test(text)) {
-                    const score = seniorityScores[level] || 0;
-                    if (score > seniorityScore) {
-                        bestSeniority = level;
-                        seniorityScore = score;
+        // Look for title patterns (these are usually the actual job title)
+        const titlePatterns = [
+            // "Position: Staff Software Engineer"
+            /(?:position|role|title|job title):\s*(.+)/i,
+            // First substantial line that looks like a title
+            /^((?:junior|mid-level|senior|staff|principal|lead|head of|vp|director|chief)?\s*(?:software|frontend|backend|full stack|mobile|devops|platform|data|ml|security|qa|product).+?engineer|developer|manager|architect|designer)/i
+        ];
+        
+        for (const line of lines) {
+            for (const pattern of titlePatterns) {
+                const match = line.match(pattern);
+                if (match) {
+                    const title = match[1] || match[0];
+                    
+                    // Extract seniority from title
+                    const seniorityMatch = title.match(/\b(junior|jr\.?|mid-level|senior|sr\.?|staff|principal|lead|manager|director|head of|vp|chief)\b/i);
+                    if (seniorityMatch) {
+                        const seniority = seniorityMatch[1].toLowerCase();
+                        if (seniority.includes('junior') || seniority.includes('jr')) bestSeniority = 'Junior';
+                        else if (seniority.includes('mid')) bestSeniority = 'Mid-level';
+                        else if (seniority.includes('senior') || seniority.includes('sr')) bestSeniority = 'Senior';
+                        else if (seniority.includes('staff')) bestSeniority = 'Staff';
+                        else if (seniority.includes('principal')) bestSeniority = 'Principal';
+                        else if (seniority.includes('lead')) bestSeniority = 'Lead';
+                        else if (seniority.includes('manager')) bestSeniority = 'Manager';
+                        else if (seniority.includes('director') || seniority.includes('head')) bestSeniority = 'Director';
+                        else if (seniority.includes('vp') || seniority.includes('chief')) bestSeniority = 'Executive';
+                    }
+                    
+                    // Extract base role from title
+                    const roleMatch = title.match(/\b(software|frontend|backend|full stack|mobile|devops|platform|data|ml|machine learning|security|qa|product)\s+(?:engineer|developer|manager|architect|designer)/i);
+                    if (roleMatch) {
+                        bestRole = roleMatch[0];
+                        return { role: bestRole, seniority: bestSeniority };
                     }
                 }
-            });
-        });
+            }
+        }
+        
+        // FALLBACK: If no title found, do broader search but be more careful
+        let bestScore = 0;
         
         // Find role with scoring (prefer more specific roles)
         Object.entries(ROLE_VARIATIONS).forEach(([role, variations]) => {
