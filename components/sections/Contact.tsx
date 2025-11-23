@@ -57,7 +57,7 @@ export const Contact: React.FC = () => {
           <div className="text-left">
              <div className="flex gap-6 mb-4">
                <a 
-                 href="https://www.linkedin.com/in/zack-stevens-135955154/" 
+                 href="https://www.linkedin.com/in/zackstevens-/" 
                  target="_blank" 
                  rel="noopener noreferrer"
                  className="text-zinc-500 hover:text-zinc-900 dark:text-gray-400 dark:hover:text-white transition-colors"
