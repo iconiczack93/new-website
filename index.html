@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased text-slate-900 bg-[#030303] dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zack Stevens | Technical Recruiter & AI Tool Builder</title>
+    <meta name="description" content="Zack Stevens - Technical Recruiter & AI Tool Builder. Custom recruiting automation that finds top talent faster. 5+ years experience building bespoke sourcing engines.">
+    
+    <!-- Performance & SEO -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#030303">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/headshot.jpg" as="image">
+    <link rel="modulepreload" href="/src/main.tsx">
+    <meta name="keywords" content="technical recruiter, AI recruiting tools, talent sourcing, Boolean search, recruiting automation, candidate evaluation, sourcing intelligence">
+    <meta name="author" content="Zack Stevens">
+    
+    <!-- Google Fonts: Inter & Space Grotesk & JetBrains Mono & Syne -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+      /* Font display optimization */
+      @font-face { font-family: 'Inter'; font-display: swap; }
+      @font-face { font-family: 'Space Grotesk'; font-display: swap; }
+      @font-face { font-family: 'Syne'; font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; font-display: swap; }
+    </style>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+              syne: ['Syne', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              'void': '#030303',
+              'deep-void': '#050505',
+              'accent': '#6366f1', // Indigo-500
+              'acid-green': '#bef264', // Lime-400ish
+              'electric-purple': '#a855f7', // Purple-500
+              'glass': 'rgba(255, 255, 255, 0.03)',
+              'glass-border': 'rgba(255, 255, 255, 0.08)',
+            },
+            backgroundImage: {
+              'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+            },
+            animation: {
+              'blob': 'blob 10s infinite',
+            },
+            keyframes: {
+              blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Custom Scrollbar to keep the immersion */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      
+      body {
+        cursor: none; /* We are implementing a custom cursor */
+      }
+      
+      /* Blueprint Mode Grid */
+      .blueprint-grid {
+        background-size: 40px 40px;
+        background-image:
+          linear-gradient(to right, rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-zinc-200 dark:bg-void text-zinc-900 dark:text-white overflow-x-hidden selection:bg-acid-green selection:text-black transition-colors duration-500">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

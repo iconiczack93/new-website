@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM - Candidate Evaluation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #030303 0%, #09090B 100%);
+            color: white;
+            width: 400px;
+            height: 700px;
+            overflow: hidden;
+        }
+        .container {
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .header p {
+            font-size: 13px;
+            color: #A1A1AA;
+        }
+        .header p.analyzing {
+            color: #4ADE80;
+        }
+        .section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .profile-field {
+            margin-bottom: 12px;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.4s ease;
+        }
+        .profile-field.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .profile-label {
+            font-size: 11px;
+            color: #A1A1AA;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .profile-value {
+            font-size: 14px;
+            color: white;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .score-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .score-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+        }
+        .score-label {
+            font-size: 12px;
+            color: #A1A1AA;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: white;
+            color: #18181B;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.4s ease;
+        }
+        .badge.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+        .btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes countUp {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .analyzing-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PRISM</h1>
+            <p id="statusText">AI Candidate Evaluation</p>
+        </div>
+        
+        <div class="section" id="profileSection">
+            <div class="section-title">Profile</div>
+            <div class="profile-field">
+                <div class="profile-label">Name</div>
+                <div class="profile-value">John Smith</div>
+            </div>
+            <div class="profile-field">
+                <div class="profile-label">Role</div>
+                <div class="profile-value">Senior Software Engineer</div>
+            </div>
+            <div class="profile-field">
+                <div class="profile-label">Location</div>
+                <div class="profile-value">San Francisco, CA</div>
+            </div>
+        </div>
+        
+        <div class="section" id="evalSection">
+            <div class="section-title">Evaluation Results</div>
+            <div class="score-card">
+                <div class="score-value" id="scoreValue">0.0</div>
+                <div class="score-label">Match Score (out of 5)</div>
+            </div>
+            <div style="margin-top: 12px; text-align: center;">
+                <span class="badge" id="visaBadge">Visa: Eligible</span>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn" id="btn1">View Details</button>
+            <button class="btn" id="btn2">Export</button>
+        </div>
+    </div>
+
+    <script>
+        function animateScore(element, target, duration) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = current.toFixed(1);
+            }, 16);
+        }
+
+        function runDemo() {
+            const statusText = document.getElementById('statusText');
+            const profileSection = document.getElementById('profileSection');
+            const evalSection = document.getElementById('evalSection');
+            const profileFields = document.querySelectorAll('.profile-field');
+            const scoreValue = document.getElementById('scoreValue');
+            const visaBadge = document.getElementById('visaBadge');
+            const btn1 = document.getElementById('btn1');
+            const btn2 = document.getElementById('btn2');
+
+            // Reset all
+            profileSection.classList.remove('visible');
+            evalSection.classList.remove('visible');
+            profileFields.forEach(f => f.classList.remove('visible'));
+            visaBadge.classList.remove('visible');
+            btn1.classList.remove('visible');
+            btn2.classList.remove('visible');
+            scoreValue.textContent = '0.0';
+            statusText.textContent = 'AI Candidate Evaluation';
+
+            // Start animation sequence
+            setTimeout(() => {
+                statusText.textContent = 'Analyzing Profile...';
+                statusText.classList.add('analyzing');
+            }, 500);
+
+            // Show profile section
+            setTimeout(() => {
+                profileSection.classList.add('visible');
+            }, 1200);
+
+            // Show profile fields one by one
+            profileFields.forEach((field, index) => {
+                setTimeout(() => {
+                    field.classList.add('visible');
+                }, 1400 + (index * 200));
+            });
+
+            // Show evaluation section
+            setTimeout(() => {
+                statusText.textContent = 'Evaluation Complete';
+                evalSection.classList.add('visible');
+            }, 2400);
+
+            // Animate score counting up
+            setTimeout(() => {
+                animateScore(scoreValue, 4.2, 1000);
+            }, 2600);
+
+            // Show visa badge
+            setTimeout(() => {
+                visaBadge.classList.add('visible');
+            }, 3200);
+
+            // Show buttons
+            setTimeout(() => {
+                btn1.classList.add('visible');
+            }, 3600);
+
+            setTimeout(() => {
+                btn2.classList.add('visible');
+                statusText.textContent = 'AI Candidate Evaluation';
+                statusText.classList.remove('analyzing');
+            }, 3800);
+
+            // Loop
+            setTimeout(runDemo, 7000);
+        }
+
+        // Start animation on load
+        window.addEventListener('load', () => {
+            setTimeout(runDemo, 600);
+        });
+    </script>
+</body>
+</html>

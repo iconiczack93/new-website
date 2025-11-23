@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRAMEWORK - Talent Architecture</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #030303;
+            color: white;
+            width: 1200px;
+            height: 800px;
+            overflow: hidden;
+            position: relative;
+        }
+        .architectural-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+        .container {
+            padding: 32px;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #27272A;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .header-text h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+        .header-text p {
+            font-size: 13px;
+            color: #A1A1AA;
+        }
+        .search-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .search-input {
+            width: 100%;
+            background: #27272A;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 14px 16px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 16px;
+            transition: border-color 0.3s;
+        }
+        .search-input.active {
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+        }
+        .build-btn {
+            background: white;
+            color: #18181B;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .build-btn.building {
+            opacity: 0.7;
+        }
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            height: calc(100% - 240px);
+        }
+        .result-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .result-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .company-item {
+            background: rgba(39,39,42,0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #D4D4D8;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+        .company-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .terminal {
+            background: #18181B;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #E4E4E7;
+            overflow-y: auto;
+        }
+        .terminal-header {
+            color: #A1A1AA;
+            margin-bottom: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .terminal-content {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .terminal-content.visible {
+            opacity: 1;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .building-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="architectural-grid"></div>
+    <div class="container">
+        <div class="header">
+            <div class="logo">F</div>
+            <div class="header-text">
+                <h1>FRAMEWORK</h1>
+                <p>AI-Powered Talent Architecture Engine</p>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <input type="text" class="search-input" id="searchInput" placeholder="Enter company name..." value="OpenAI" readonly>
+            <button class="build-btn" id="buildBtn">Build Map</button>
+        </div>
+        
+        <div class="results">
+            <div class="result-card" id="competitors">
+                <h3>Direct Competitors</h3>
+                <div class="company-item" data-company="Anthropic">Anthropic</div>
+                <div class="company-item" data-company="Google DeepMind">Google DeepMind</div>
+                <div class="company-item" data-company="Cohere">Cohere</div>
+                <div class="company-item" data-company="Inflection AI">Inflection AI</div>
+                <div class="company-item" data-company="Adept AI">Adept AI</div>
+            </div>
+            
+            <div class="result-card" id="analogous">
+                <h3>Analogous Companies</h3>
+                <div class="company-item" data-company="Hugging Face">Hugging Face</div>
+                <div class="company-item" data-company="Scale AI">Scale AI</div>
+                <div class="company-item" data-company="Databricks">Databricks</div>
+                <div class="company-item" data-company="Character.AI">Character.AI</div>
+                <div class="company-item" data-company="Perplexity AI">Perplexity AI</div>
+            </div>
+            
+            <div class="result-card" style="grid-column: 1 / -1;">
+                <div class="terminal">
+                    <div class="terminal-header">Master Search String</div>
+                    <div class="terminal-content" id="terminalContent">(site:linkedin.com/in OR site:linkedin.com/pub) "OpenAI" OR "Anthropic" OR "DeepMind" OR "Cohere" OR "Inflection AI" OR "Adept"</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animation sequence
+        function runDemo() {
+            const searchInput = document.getElementById('searchInput');
+            const buildBtn = document.getElementById('buildBtn');
+            const competitors = document.querySelectorAll('#competitors .company-item');
+            const analogous = document.querySelectorAll('#analogous .company-item');
+            const terminalContent = document.getElementById('terminalContent');
+
+            // Simulate button click
+            setTimeout(() => {
+                searchInput.classList.add('active');
+                buildBtn.classList.add('building');
+                buildBtn.textContent = 'Building...';
+            }, 500);
+
+            // Show competitors one by one
+            competitors.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, 1200 + (index * 200));
+            });
+
+            // Show analogous companies
+            analogous.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, 1200 + (index * 200));
+            });
+
+            // Show terminal content
+            setTimeout(() => {
+                terminalContent.classList.add('visible');
+                buildBtn.classList.remove('building');
+                buildBtn.textContent = 'Map Complete';
+                searchInput.classList.remove('active');
+            }, 3000);
+
+            // Reset for loop
+            setTimeout(() => {
+                buildBtn.textContent = 'Build Map';
+                competitors.forEach(item => item.classList.remove('visible'));
+                analogous.forEach(item => item.classList.remove('visible'));
+                terminalContent.classList.remove('visible');
+                setTimeout(runDemo, 1000);
+            }, 6000);
+        }
+
+        // Start animation on load
+        window.addEventListener('load', () => {
+            setTimeout(runDemo, 800);
+        });
+    </script>
+</body>
+</html>
