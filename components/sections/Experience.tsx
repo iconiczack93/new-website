@@ -10,7 +10,7 @@ const experiences: Experience[] = [
     role: 'Research Associate / Technical Sourcer',
     period: 'Dec 2021 — Present',
     logo: 'S',
-    description: 'Technical sourcing for high-growth startups. Building pipelines for Product and Engineering roles at scale.',
+    description: 'Technical sourcing for high-growth startups. Building pipelines for Product, Engineering, and GTM teams at scale.',
     impact: [
       'Managing 30+ searches annually across Product & Eng',
       'Built pipelines of 50-100+ qualified candidates per search',
