@@ -447,9 +447,12 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
                     fullText += pageText + '\n';
                 }
                 
-                // Set the extracted text
+                // Set the extracted text AND auto-analyze with AI
                 setJdText(fullText.trim());
-                showToast('✓ PDF extracted successfully!');
+                showToast('✓ PDF extracted! Analyzing with AI...');
+                
+                // Automatically trigger AI analysis
+                await analyzeWithAI(fullText.trim());
                 
                 // Reset the file input
                 e.target.value = '';
@@ -469,18 +472,84 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
         }
     };
 
-    const runAnalysis = () => {
+    const analyzeWithAI = async (text: string) => {
+        try {
+            const GEMINI_API_KEY = 'AIzaSyDHTrg_KfwNXTLxakUjYp3MeLiAnqZ1uU0';
+            
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: `Extract job details from this job description. Return ONLY valid JSON with this exact structure:
+{
+  "role": "exact job title",
+  "seniority": "Junior|Mid-level|Senior|Staff|Principal|Lead|Manager|Director|Executive or empty string",
+  "skills": ["skill1", "skill2"],
+  "location": "city name or Remote or empty string"
+}
+
+Rules:
+- role: Extract the ACTUAL job title (e.g., "Staff Software Engineer", "Senior Frontend Engineer")
+- seniority: Extract ONLY if explicitly stated in the title
+- skills: Only technical skills (languages, frameworks, tools) - no soft skills
+- location: City name, "Remote", or empty string
+- Return empty strings/arrays if not found
+- DO NOT include any text outside the JSON
+
+Job Description:
+${text}`
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.1,
+                        maxOutputTokens: 500
+                    }
+                })
+            });
+
+            const data = await response.json();
+            const aiResponse = data.candidates[0].content.parts[0].text;
+            
+            // Parse the JSON response
+            const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                
+                // Auto-populate the form
+                if (parsed.role) setRole(parsed.role);
+                if (parsed.skills && Array.isArray(parsed.skills)) setSkills(parsed.skills);
+                if (parsed.location) setLocation(parsed.location);
+                
+                // Show success message
+                const parts = [];
+                if (parsed.role) parts.push(parsed.role);
+                if (parsed.skills?.length) parts.push(`${parsed.skills.length} skills`);
+                if (parsed.location) parts.push(parsed.location);
+                
+                showToast(`✓ AI Parsed: ${parts.join(', ')}`);
+                setMode('build'); // Switch to build mode to show results
+            } else {
+                throw new Error('Invalid AI response');
+            }
+            
+        } catch (error) {
+            console.error('AI analysis error:', error);
+            showToast('⚠️ AI parsing failed. Please review and adjust manually.');
+        }
+    };
+
+    const runAnalysis = async () => {
         if (!jdText.trim()) return;
         setIsScanning(true);
         setScanProgress(0);
-        setScanLog(['Initializing parser...']);
+        setScanLog(['Connecting to AI...']);
 
         const sequence = [
-            { t: 300, msg: 'Tokenizing text stream...', p: 20 },
-            { t: 600, msg: 'Extracting technical entities...', p: 45 },
-            { t: 900, msg: 'Identifying seniority levels...', p: 70 },
-            { t: 1200, msg: 'Parsing location data...', p: 85 },
-            { t: 1500, msg: 'Optimization complete.', p: 100 },
+            { t: 300, msg: 'Analyzing job description...', p: 30 },
+            { t: 800, msg: 'Extracting key details...', p: 60 },
+            { t: 1200, msg: 'Parsing complete...', p: 90 },
         ];
 
         sequence.forEach(({ t, msg, p }) => {
@@ -490,40 +559,12 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
             }, t);
         });
 
+        // Use AI to parse
+        await analyzeWithAI(jdText);
+        
         setTimeout(() => {
-            // Extract all data
-            const foundSkills = extractSkills(jdText);
-            const { role: foundRole, seniority } = extractRole(jdText);
-            const foundLocation = extractLocation(jdText);
-            
-            // Auto-populate form
-            setSkills(foundSkills);
-            
-            const finalRole = seniority && foundRole ? 
-                (foundRole.includes(seniority) ? foundRole : `${seniority} ${foundRole}`) : 
-                foundRole || '';
-            setRole(finalRole);
-            
-            if (foundLocation) {
-                setLocation(foundLocation);
-            }
-            
-            // Show results toast
-            const skillCount = foundSkills.length;
-            const parts = [];
-            if (finalRole) parts.push(finalRole);
-            if (skillCount > 0) parts.push(`${skillCount} skills`);
-            if (foundLocation) parts.push(foundLocation);
-            
-            const toastMessage = parts.length > 0 ? 
-                `✓ Found: ${parts.join(', ')}` : 
-                '⚠️ No clear matches found - try a more detailed JD';
-            
-            showToast(toastMessage);
-            
             setIsScanning(false);
-            setMode('build');
-        }, 1500);
+        }, 1400);
     };
 
     const clearForm = () => {
