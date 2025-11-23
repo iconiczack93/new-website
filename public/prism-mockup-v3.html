@@ -10,8 +10,9 @@
             font-family: 'Inter', -apple-system, sans-serif;
             background: linear-gradient(135deg, #030303 0%, #09090B 100%);
             color: white;
-            width: 400px;
-            height: 700px;
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
             overflow: hidden;
         }
         .container {
@@ -188,11 +189,6 @@
                 <span class="badge" id="visaBadge">Visa: Eligible</span>
             </div>
         </div>
-        
-        <div class="action-buttons">
-            <button class="btn" id="btn1">View Details</button>
-            <button class="btn" id="btn2">Export</button>
-        </div>
     </div>
 
     <script>
@@ -218,16 +214,12 @@
             const profileFields = document.querySelectorAll('.profile-field');
             const scoreValue = document.getElementById('scoreValue');
             const visaBadge = document.getElementById('visaBadge');
-            const btn1 = document.getElementById('btn1');
-            const btn2 = document.getElementById('btn2');
 
             // Reset all
             profileSection.classList.remove('visible');
             evalSection.classList.remove('visible');
             profileFields.forEach(f => f.classList.remove('visible'));
             visaBadge.classList.remove('visible');
-            btn1.classList.remove('visible');
-            btn2.classList.remove('visible');
             scoreValue.textContent = '0.0';
             statusText.textContent = 'AI Candidate Evaluation';
 
@@ -257,27 +249,18 @@
 
             // Animate score counting up
             setTimeout(() => {
-                animateScore(scoreValue, 4.2, 1000);
+                animateScore(scoreValue, 4.5, 1000);
             }, 2600);
 
             // Show visa badge
             setTimeout(() => {
                 visaBadge.classList.add('visible');
-            }, 3200);
-
-            // Show buttons
-            setTimeout(() => {
-                btn1.classList.add('visible');
-            }, 3600);
-
-            setTimeout(() => {
-                btn2.classList.add('visible');
                 statusText.textContent = 'AI Candidate Evaluation';
                 statusText.classList.remove('analyzing');
-            }, 3800);
+            }, 3200);
 
             // Loop
-            setTimeout(runDemo, 7000);
+            setTimeout(runDemo, 6000);
         }
 
         // Start animation on load

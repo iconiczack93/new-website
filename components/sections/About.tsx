@@ -49,7 +49,7 @@ export const About: React.FC = () => {
                 transition={{ delay: 0.4 }}
                 className="text-zinc-700 dark:text-gray-400 text-xl font-light leading-relaxed"
              >
-                5 years of high-volume technical sourcing meets custom AI engineering. The result? Tools that 10x recruiting efficiency.
+                4 years of high-volume technical sourcing meets custom AI engineering. The result? Tools that 10x recruiting efficiency.
              </motion.p>
           </div>
       </div>

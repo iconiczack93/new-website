@@ -254,6 +254,7 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
     const [isScanning, setIsScanning] = useState(false);
     const [scanLog, setScanLog] = useState<string[]>([]);
     const [scanProgress, setScanProgress] = useState(0);
+    const [usedAI, setUsedAI] = useState(false);
 
     const addSkill = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ',') {
@@ -485,6 +486,7 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
                 console.error('❌ No API key found in environment variables');
                 showToast('⚠️ API key not configured. Using fallback parsing...');
                 // Fallback to regex parsing
+                setUsedAI(false);
                 const foundSkills = extractSkills(text);
                 const { role: foundRole, seniority } = extractRole(text);
                 const foundLocation = extractLocation(text);
@@ -584,6 +586,7 @@ ${text}`
                 if (parsed.location) parts.push(parsed.location);
                 
                 showToast(`✓ AI Parsed: ${parts.join(', ')}`);
+                setUsedAI(true);
                 setMode('build'); // Switch to build mode to show results
             } else {
                 throw new Error('Invalid AI response format');
@@ -691,6 +694,28 @@ ${text}`
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const exportAsJSON = () => {
+        const data = { role, skills, location, excludeTerms, booleanString: generated };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boolean-${role.replace(/\s+/g, '-').toLowerCase()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportAsCSV = () => {
+        const csv = `Role,Skills,Location,Boolean String\n"${role}","${skills.join('; ')}","${location}","${generated}"`;
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boolean-${role.replace(/\s+/g, '-').toLowerCase()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     const runSearch = (platform: 'linkedin' | 'google') => {
         const query = encodeURIComponent(generated);
         const url = platform === 'linkedin' 
@@ -700,7 +725,7 @@ ${text}`
     };
 
     return (
-        <div className="mt-2 bg-zinc-50/50 dark:bg-black/50 rounded-xl border border-zinc-200 dark:border-white/10 font-sans flex-1 min-h-0 flex flex-col pointer-events-auto relative overflow-hidden shadow-inner"
+        <div className="mt-2 bg-zinc-50/50 dark:bg-black/50 rounded-xl border border-zinc-200 dark:border-white/10 font-sans flex flex-col pointer-events-auto relative overflow-hidden shadow-inner h-auto"
              onMouseEnter={onFocus} 
              onMouseLeave={onBlur}
         >
@@ -756,7 +781,7 @@ ${text}`
                 )}
             </AnimatePresence>
 
-            <div className="p-3 flex-1 flex flex-col min-h-0 gap-2">
+            <div className="p-3 flex-1 flex flex-col gap-2 overflow-visible h-auto">
                 {mode === 'build' ? (
                     <>
                          <div className="flex gap-2">
@@ -780,7 +805,7 @@ ${text}`
                             </div>
                         </div>
                         
-                        <div className="bg-white dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 min-h-[40px] max-h-[70px] overflow-y-auto focus-within:border-purple-500/50 transition-all">
+                        <div className="bg-white dark:bg-black/40 border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 min-h-[40px] focus-within:border-purple-500/50 transition-all">
                              <div className="flex flex-wrap gap-1.5">
                                 <div className="flex items-center gap-2 text-zinc-400 select-none">
                                     <Code2 size={12} />
@@ -829,20 +854,41 @@ ${text}`
                              </button>
                          )}
 
-                        <div className="flex-1 relative group/code min-h-[200px] bg-zinc-900 dark:bg-black rounded-lg border border-zinc-800 dark:border-white/10 mt-1">
-                            <textarea 
-                                readOnly
-                                className="w-full h-full bg-transparent text-green-400 font-mono text-sm p-4 pr-24 rounded-lg resize-none outline-none leading-relaxed"
-                                value={generated}
-                            />
-                            <div className="absolute bottom-2 right-2 flex gap-1 z-20 opacity-70 hover:opacity-100 transition-opacity">
-                                <button onClick={copyToClipboard} className="p-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-white transition-colors" title="Copy">
-                                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                        {/* Stats & Export Bar */}
+                        <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                            <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                                <span className="flex items-center gap-1">
+                                    <Code2 size={10} />
+                                    <span className="font-medium text-zinc-700 dark:text-zinc-300">{skills.length}</span> skills
+                                </span>
+                                {usedAI && (
+                                    <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                                        <Sparkles size={10} /> AI
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <button onClick={copyToClipboard} className="p-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-white transition-colors" title="Copy Boolean String">
+                                    {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                                 </button>
-                                <button onClick={() => setGenerated('Your Boolean search string will appear here...')} className="p-1.5 bg-red-600 hover:bg-red-500 rounded text-white transition-colors" title="Clear">
+                                <button onClick={() => setGenerated('Your Boolean search string will appear here...')} className="p-1.5 bg-red-600 hover:bg-red-500 rounded text-white transition-colors" title="Clear Output">
                                     <Trash2 size={12} />
                                 </button>
+                                <button 
+                                    onClick={exportAsCSV}
+                                    className="px-2 py-1 text-[9px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded transition-colors"
+                                    title="Export as CSV"
+                                    disabled={!generated || generated === 'Your Boolean search string will appear here...'}
+                                >
+                                    CSV
+                                </button>
                             </div>
+                        </div>
+
+                        <div className="bg-zinc-900 dark:bg-black rounded-lg border border-zinc-800 dark:border-white/10 mt-1 p-4 min-h-[200px]">
+                            <pre className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap break-words">
+                                {generated}
+                            </pre>
                         </div>
                     </>
                 ) : (
@@ -1002,18 +1048,18 @@ const TiltCard: React.FC<TiltCardProps> = ({ project, className, onClick }) => {
         transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
         transition: 'transform 0.1s ease-out'
       }}
-      className={`clickable group relative h-[500px] w-full cursor-default ${!isTool ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
+      className={`clickable group relative min-h-[500px] h-auto w-full cursor-default ${!isTool ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
     >
       {/* LAYER 0: Floor */}
       <div 
-        className="absolute inset-0 bg-zinc-100/80 dark:bg-black/90 backdrop-blur-xl rounded-2xl border border-zinc-300 dark:border-white/10 overflow-hidden transition-colors duration-500 group-hover:border-zinc-400 dark:group-hover:border-white/30 group-hover:shadow-2xl dark:group-hover:shadow-[0_0_50px_rgba(255,255,255,0.05)]"
+        className="absolute inset-0 bg-zinc-100/80 dark:bg-black/90 backdrop-blur-xl rounded-2xl border border-zinc-300 dark:border-white/10 overflow-hidden transition-colors duration-500 group-hover:border-zinc-400 dark:group-hover:border-white/30 group-hover:shadow-2xl dark:group-hover:shadow-[0_0_50px_rgba(255,255,255,0.05)] h-full"
         style={{ transform: 'translateZ(0px)' }}
       >
         <div className="absolute inset-0 bg-[size:40px_40px] opacity-30 group-hover:opacity-50 transition-opacity duration-500 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" />
       </div>
 
       {/* LAYER 1: Content */}
-      <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between pointer-events-none">
+      <div className="relative h-full p-8 md:p-10 flex flex-col justify-between pointer-events-none">
         
         {/* Header - Floats */}
         <div 
@@ -1040,7 +1086,7 @@ const TiltCard: React.FC<TiltCardProps> = ({ project, className, onClick }) => {
                  {project.title}
             </h3>
             
-             <p className="text-lg text-zinc-500 dark:text-gray-400 font-light leading-tight max-w-lg">
+             <p className="text-base text-zinc-500 dark:text-gray-400 font-light whitespace-nowrap overflow-hidden text-ellipsis">
                 {project.description}
             </p>
         </div>

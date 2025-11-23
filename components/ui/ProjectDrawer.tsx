@@ -11,7 +11,7 @@ interface ProjectDrawerProps {
 // --- SIMULATIONS ---
 
 const FrameworkSim = () => (
-    <div className="relative w-full h-[500px] bg-black rounded-lg overflow-hidden border border-white/10">
+    <div className="relative w-full h-[550px] bg-black rounded-lg overflow-hidden border border-white/10">
         <iframe 
             src="/framework-mockup-v3.html" 
             className="w-full h-full"
