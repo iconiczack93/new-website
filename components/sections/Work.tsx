@@ -310,12 +310,29 @@ const BooleanTool: React.FC<{ onFocus: () => void, onBlur: () => void }> = ({ on
         let bestRole = '';
         let bestSeniority = '';
         let bestScore = 0;
+        let seniorityScore = 0;
         
-        // Find seniority level
+        // Find seniority level with scoring (higher score = more senior/specific)
+        const seniorityScores: Record<string, number> = {
+            'Junior': 1,
+            'Mid-level': 2,
+            'Senior': 3,
+            'Staff': 4,        // Staff > Senior
+            'Principal': 5,    // Principal > Staff
+            'Lead': 3,         // Lead ~ Senior (to not override Staff/Principal)
+            'Manager': 6,
+            'Director': 7,
+            'Executive': 8
+        };
+        
         Object.entries(SENIORITY_KEYWORDS).forEach(([level, variations]) => {
             variations.forEach(variation => {
                 if (createSafeRegex(variation).test(text)) {
-                    bestSeniority = level;
+                    const score = seniorityScores[level] || 0;
+                    if (score > seniorityScore) {
+                        bestSeniority = level;
+                        seniorityScore = score;
+                    }
                 }
             });
         });
