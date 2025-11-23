@@ -1060,7 +1060,7 @@ const TiltCard: React.FC<TiltCardProps> = ({ project, className, onClick }) => {
       </div>
 
       {/* LAYER 1: Content */}
-      <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between pointer-events-none">
+      <div className="relative h-full min-h-full p-8 md:p-10 flex flex-col justify-between pointer-events-none">
         
         {/* Header - Floats */}
         <div 
