@@ -1083,10 +1083,16 @@ const TiltCard: React.FC<TiltCardProps> = ({ project, className, onClick }) => {
                 )}
             </div>
 
-            <h3 className="text-4xl md:text-5xl font-bold mb-2 font-syne text-zinc-900 dark:text-white drop-shadow-xl">
-                 {project.title}
-            </h3>
-            
+            <div className="flex items-center gap-3 mb-2">
+                <h3 className="text-4xl md:text-5xl font-bold font-syne text-zinc-900 dark:text-white drop-shadow-xl">
+                     {project.title}
+                </h3>
+                {isTool && (
+                    <span className="text-xs font-mono text-green-500 dark:text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded">
+                        TRY IT
+                    </span>
+                )}
+            </div>
              <p className="text-base text-zinc-500 dark:text-gray-400 font-light">
                 {project.description}
             </p>
